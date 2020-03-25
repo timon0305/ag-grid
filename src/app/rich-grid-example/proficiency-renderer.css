@@ -31,3 +31,10 @@ label {
 .ag-menu {
     z-index: 50;
 }
+mat-button-toggle-group {
+  margin-left: 12px;
+}
+
+.example-form-field {
+  width: 200px;
+}

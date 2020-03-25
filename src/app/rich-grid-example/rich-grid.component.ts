@@ -4,6 +4,8 @@ import {ColumnApi, GridApi} from '@ag-grid-enterprise/all-modules';
 import {ProficiencyFilter} from '../filters/proficiency.component.filter';
 import {SkillFilter} from '../filters/skill.component.filter';
 import RefData from '../data/refData';
+import '@ag-grid-community/all-modules/dist/styles/ag-grid.css';
+import '@ag-grid-community/all-modules/dist/styles/ag-theme-alpine.css';
 
 // for community features
 // import {Module, CommunityModules} from "@ag-grid-community/all-modules";
@@ -236,6 +238,15 @@ export class RichGridComponent {
 
         this.api.onFilterChanged();
     };
+    public onBtnExport() {
+      let params = getParams();
+      if (params.suppressQuotes || params.columnSeparator) {
+        alert(
+          'NOTE: you are downloading a file with non-standard quotes or separators - it may not render correctly in Excel.'
+        );
+      }
+      this.api.exportDataAsCsv(params);
+    }
 }
 
 function skillsCellRenderer(params) {
@@ -296,4 +307,75 @@ function pad(num, totalStringSize) {
     while (asString.length < totalStringSize) { asString = '0' + asString; }
     return asString;
 }
+function getValue(inputSelector) {
+  try {
+    var text = document.querySelector(inputSelector).value;
+    switch (text) {
+      case 'string':
+        return (
+          'Here is a comma, and a some "quotes". You can see them using the\n' +
+          'api.getDataAsCsv() button but they will not be visible when the downloaded\n' +
+          'CSV file is opened in Excel because string content passed to\n' +
+          'customHeader and customFooter is not escaped.'
+        );
+      case 'array':
+        return [
+          [],
+          [
+            {
+              data: {
+                value: 'Here is a comma, and a some "quotes".',
+                type: 'String',
+              },
+            },
+          ],
+          [
+            {
+              data: {
+                value:
+                  'They are visible when the downloaded CSV file is opened in Excel because custom content is properly escaped (provided that suppressQuotes is not set to true)',
+                type: 'String',
+              },
+            },
+          ],
+          [
+            {
+              data: {
+                value: 'this cell:',
+                type: 'String',
+              },
+              mergeAcross: 1,
+            },
+            {
+              data: {
+                value: 'is empty because the first cell has mergeAcross=1',
+                type: 'String',
+              },
+            },
+          ],
+          [],
+        ];
+      case 'none':
+        return;
+      case 'tab':
+        return '\t';
+      case 'true':
+        return true;
+      case 'none':
+        return;
+      default:
+        return text;
+    }
+  } catch (e) {
+    // console.log(e)
+  }
 
+}
+function getParams() {
+  return {
+    suppressQuotes: getValue('#suppressQuotes'),
+    columnSeparator: getValue('#columnSeparator'),
+    customHeader: getValue('#customHeader'),
+    customFooter: getValue('#customFooter'),
+  };
+}
